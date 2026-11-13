@@ -1,1 +1,2 @@
 This repo should contain all the code you use during the process of building your robot. It is uploaded here because somebody else may need to use it and it is better to have it availible when needed. If applicable, follow similar formatting with titles to your uploads for easy finding, and make it clear what the file does, so when somebody needs something, they can find it. By uploading your code here, you allow other groups to use it, so keep that in mind.
+If you deem any information nessecary to the project, add it here.
