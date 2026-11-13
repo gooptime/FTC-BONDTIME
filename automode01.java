@@ -1,0 +1,99 @@
+package org.firstinspires.ftc.teamcode;
+
+import android.util.Size;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.vision.VisionPortal;
+import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
+import org.firstinspires.ftc.vision.apriltag.AprilTagLibrary;
+import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
+
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+@Autonomous(name="auto wheels only")
+public class automode01 extends LinearOpMode {
+
+    private DcMotor frontLeft;
+    private DcMotor frontRight;
+    private DcMotor backLeft;
+    private DcMotor backRight;
+
+    private void drivetrain(double speedl, double speedr, long time) throws InterruptedException {
+        frontLeft.setPower(speedl);
+        frontRight.setPower(speedr);
+        backLeft.setPower(speedl);
+        backRight.setPower(speedr);
+        TimeUnit.MILLISECONDS.sleep(time);
+        frontLeft.setPower(0);
+        frontRight.setPower(0);
+        backLeft.setPower(0);
+        backRight.setPower(0);
+    }
+
+    @Override
+    public void runOpMode() throws InterruptedException {
+        frontLeft = hardwareMap.get(DcMotor.class, "frontLeft");
+        frontRight = hardwareMap.get(DcMotor.class, "frontRight");
+        backLeft = hardwareMap.get(DcMotor.class, "backLeft");
+        backRight = hardwareMap.get(DcMotor.class, "backRight");
+
+        frontRight.setDirection(DcMotorSimple.Direction.REVERSE);
+        backRight.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        backRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        AprilTagLibrary.Builder libraryBuilder = new AprilTagLibrary.Builder();
+        for (int id = 30; id <= 45; id++) {
+            libraryBuilder.addTag(id, "Tag_" + id, 3.5, DistanceUnit.INCH);
+        }
+        AprilTagLibrary customLibrary = libraryBuilder.build();
+
+        AprilTagProcessor aprilTag = new AprilTagProcessor.Builder()
+                .setLensIntrinsics(578.272, 578.272, 402.145, 221.50)
+                .setTagLibrary(customLibrary)
+                .build();
+
+        VisionPortal visionPortal = new VisionPortal.Builder()
+                .setStreamFormat(VisionPortal.StreamFormat.YUY2)
+                .setCamera(hardwareMap.get(WebcamName.class, "Cam1"))
+                .setCameraResolution(new Size(1280, 720))
+                .addProcessor(aprilTag)
+                .build();
+
+        telemetry.addLine("Initializing... Wait for Start...");
+        telemetry.update();
+
+        waitForStart();
+
+        while (opModeIsActive()) {
+            List<AprilTagDetection> detections = aprilTag.getDetections();
+
+            if (detections.isEmpty()) {
+                telemetry.addLine("No tags detected.");
+            } else {
+                for (AprilTagDetection tag : detections) {
+                    if (tag.ftcPose != null) {
+                        telemetry.addData("ID", tag.id);
+                        telemetry.addData("Range (in)", tag.ftcPose.range);
+                        telemetry.addData("Bearing (deg)", tag.ftcPose.bearing);
+                        telemetry.addData("Yaw (deg)", tag.ftcPose.yaw);
+                        telemetry.addData("X (in)", tag.ftcPose.x);
+                        telemetry.addData("Y (in)", tag.ftcPose.y);
+                    } else {
+                        telemetry.addData("Unknown ID", tag.id);
+                    }
+                }
+            }
+            telemetry.update();
+        }
+    }
+}
