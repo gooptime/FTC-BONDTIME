@@ -71,16 +71,16 @@ public class opmode01 extends LinearOpMode {
 
         while (opModeIsActive()) {
             // 4. Mecanum Joystick Control Inputs
-            double y = -gamepad1.left_stick_y;  // Forward/Backward (inverted stick Y)
-            double x = gamepad1.left_stick_x * 1.1; // Strafe Left/Right (1.1 compensates for lateral friction)
-            double rx = gamepad1.right_stick_x; // Turn Left/Right
+            double lsy = -gamepad1.left_stick_y;  // Forward/Backward (inverted stick Y)
+            double lsx = gamepad1.left_stick_x * 1.1; // Strafe Left/Right (1.1 compensates for lateral friction)
+            double rsx = gamepad1.right_stick_x; // Turn Left/Right
 
             // 5. Calculate Mecanum Motor Powers
-            double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1.0);
-            double frontLeftPower  = (y + x + rx) / denominator;
-            double backLeftPower   = (y - x + rx) / denominator;
-            double frontRightPower = (y - x - rx) / denominator;
-            double backRightPower  = (y + x - rx) / denominator;
+            double denominator = Math.max(Math.abs(lsy) + Math.abs(lsx) + Math.abs(rsx), 1.0);
+            double frontLeftPower  = (lsy + lsx + rsx) / denominator;
+            double backLeftPower   = (lsy - lsx + rsx) / denominator;
+            double frontRightPower = (lsy - lsx - rsx) / denominator;
+            double backRightPower  = (lsy + lsx - rsx) / denominator;
 
             // Apply Powers to Drive Motors
             frontLeft.setPower(frontLeftPower);
